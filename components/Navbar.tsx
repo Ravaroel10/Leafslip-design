@@ -11,7 +11,7 @@ const Navbar: React.FC = () => {
           <div className="text-[#D9ED92] bg-[#2D3E2D] p-1.5 rounded-lg">
             {ICONS.Leaf}
           </div>
-          <span>ECOCEIPT</span>
+          <span>LEAFSLIP</span>
         </div>
 
         {/* Desktop Menu */}

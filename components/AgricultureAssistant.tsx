@@ -6,7 +6,7 @@ import { Leaf, X, MessageCircle, Send, Loader2 } from 'lucide-react';
 const AgricultureAssistant: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string }[]>([
-    { role: 'bot', text: 'Halo! I am your Ecoceipt MSME assistant. Need help with stock management or food waste strategies in Indonesia?' }
+    { role: 'bot', text: 'Halo! I am your Leafslip MSME assistant. Need help with stock management or food waste strategies in Indonesia?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -34,7 +34,7 @@ const AgricultureAssistant: React.FC = () => {
         model: 'gemini-3-pro-preview',
         contents: userMsg,
         config: {
-          systemInstruction: "You are Ecoceipt AI, an expert advisor for Indonesian MSMEs. You help small business owners optimize inventory, reduce food waste, and understand their sales data from receipts. Your tone is encouraging, professional, and practical. Use Rupiah (Rp) for currency and mention local Indonesian context where relevant."
+          systemInstruction: "You are Leafslip AI, an expert advisor for Indonesian MSMEs. You help small business owners optimize inventory, reduce food waste, and understand their sales data from receipts. Your tone is encouraging, professional, and practical. Use Rupiah (Rp) for currency and mention local Indonesian context where relevant."
         }
       });
 
@@ -60,7 +60,7 @@ const AgricultureAssistant: React.FC = () => {
                 <Leaf className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm">Ecoceipt Advisor</h4>
+                <h4 className="font-bold text-sm">Leafslip Advisor</h4>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                   <span className="text-[10px] text-gray-300">Active Expert</span>

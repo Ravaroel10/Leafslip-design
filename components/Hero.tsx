@@ -13,7 +13,7 @@ const Hero: React.FC = () => {
                 Digitizing Indonesian MSMEs
               </span>
               <h1 className="text-5xl md:text-8xl font-bold leading-[0.95] mb-8 tracking-tighter">
-                Ecoceipt:<br/><span className="text-[#D9ED92]">Paperless</span> Inventory.
+                Leafslip:<br/><span className="text-[#D9ED92]">Paperless</span> Inventory.
               </h1>
               <p className="text-lg md:text-xl text-gray-300 font-light leading-relaxed mb-10 max-w-lg">
                 Stop losing money to food waste. Turn paper receipts into smart digital records and get AI stock recommendations in seconds.
