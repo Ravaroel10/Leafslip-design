@@ -22,5 +22,5 @@ export interface StockRecommendation {
   confidence: number;
 }
 
-export type AppView = 'home' | 'scanner' | 'history' | 'insights';
+export type AppView = 'home' | 'scanner' | 'history' | 'recommender' | 'chatbot';
 export type TimePeriod = 'weekly' | 'monthly' | 'yearly';
