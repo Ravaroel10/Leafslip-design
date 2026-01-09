@@ -60,7 +60,6 @@ const Footer: React.FC<FooterProps> = ({ scrollToTop }) => {
               
               <div className="grid grid-cols-2 gap-8 text-right">
                 <div className="space-y-4 text-sm">
-                  <span className="block text-gray-500 font-bold uppercase text-[10px] tracking-widest mb-4">PLATFORM</span>
                   <a href="#" className="block hover:text-[#D9ED92] transition-colors">Scanner</a>
                   <a href="#" className="block hover:text-[#D9ED92] transition-colors">Inventory API</a>
                   <a href="#" className="block hover:text-[#D9ED92] transition-colors">Waste Insights</a>

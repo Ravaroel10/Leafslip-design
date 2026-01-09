@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
 import { ICONS } from '../constants';
 import { ScannedReceipt, ReceiptItem } from '../types';
-import { Loader2, Upload, FileText, CheckCircle2, Camera, X, RefreshCw, Scan, AlertTriangle, Trash2, Calendar } from 'lucide-react';
+import { Loader2, Upload, Camera, X, Scan, Trash2, Calendar, Save, RotateCcw } from 'lucide-react';
 
 interface ReceiptScannerProps {
   onReceiptProcessed: (receipt: ScannedReceipt) => void;
@@ -11,9 +11,7 @@ interface ReceiptScannerProps {
 
 const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [isFlashing, setIsFlashing] = useState(false);
   const [pendingReceipt, setPendingReceipt] = useState<ScannedReceipt | null>(null);
   
@@ -29,9 +27,7 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
   }, [isCameraActive]);
 
   useEffect(() => {
-    return () => {
-      stopCamera();
-    };
+    return () => stopCamera();
   }, []);
 
   const stopCamera = () => {
@@ -43,7 +39,6 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
   };
 
   const startCamera = async () => {
-    setError(null);
     setPendingReceipt(null);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -51,16 +46,15 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
       });
       streamRef.current = stream;
       setIsCameraActive(true);
-      setPreview(null);
     } catch (err) {
-      setError("Could not access camera. Please check permissions.");
+      alert("Could not access camera. Please check permissions.");
     }
   };
 
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       setIsFlashing(true);
-      setTimeout(() => setIsFlashing(false), 150);
+      setTimeout(() => setIsFlashing(false), 100);
 
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -70,7 +64,6 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
       if (ctx) {
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-        setPreview(dataUrl);
         stopCamera();
         processImage(dataUrl);
       }
@@ -108,11 +101,9 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
     if (!pendingReceipt) return;
     const newItems = [...pendingReceipt.items];
     newItems[index] = { ...newItems[index], [field]: value };
-    
     if (field === 'quantity' || field === 'unitPrice') {
       newItems[index].total = newItems[index].quantity * newItems[index].unitPrice;
     }
-    
     const newGrandTotal = newItems.reduce((acc, item) => acc + item.total, 0);
     setPendingReceipt({ ...pendingReceipt, items: newItems, grandTotal: newGrandTotal });
   };
@@ -128,147 +119,172 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
     if (pendingReceipt) {
       onReceiptProcessed(pendingReceipt);
       setPendingReceipt(null);
-      setPreview(null);
     }
   };
 
   if (pendingReceipt) {
     return (
-      <div className="bg-[#FBFFF0] min-h-[600px] rounded-[40px] shadow-2xl p-6 md:p-8 flex flex-col border border-green-100 max-w-md mx-auto animate-in zoom-in duration-300">
-        <h2 className="text-2xl font-bold text-[#2E7D32] mb-6">Confirm Receipt</h2>
+      <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden flex flex-col max-w-2xl mx-auto animate-in zoom-in-95 duration-200">
+        <div className="bg-[#2D3E2D] p-3 flex justify-between items-center text-white">
+          <h2 className="font-bold flex items-center gap-2 text-[10px] uppercase tracking-[0.2em]">
+            <Scan size={14} className="text-[#D9ED92]" />
+            Verifikasi Data
+          </h2>
+          <button onClick={() => setPendingReceipt(null)} className="hover:bg-white/10 p-1 rounded">
+            <X size={16} />
+          </button>
+        </div>
         
-        <div className="flex items-center gap-2 text-green-600 font-medium mb-8 bg-green-50 w-fit px-4 py-1.5 rounded-full text-sm">
-          <Calendar size={16} />
-          <span>{pendingReceipt.date || '25 July 2025'}</span>
-        </div>
-
-        <div className="flex-1 space-y-6 overflow-y-auto pr-2 custom-scrollbar">
-          <div className="flex justify-between items-center mb-2">
-            <h3 className="font-bold text-[#2E7D32]">Edit Items</h3>
+        <div className="p-3 border-b border-gray-100 grid grid-cols-2 gap-3 items-center bg-gray-50/30">
+          <div>
+             <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Nama Toko</label>
+             <input 
+               value={pendingReceipt.merchantName} 
+               onChange={(e) => setPendingReceipt({...pendingReceipt, merchantName: e.target.value})}
+               className="bg-transparent font-bold text-[#2D3E2D] text-xs w-full outline-none focus:text-green-800"
+             />
           </div>
-
-          {pendingReceipt.items.map((item, idx) => (
-            <div key={idx} className="space-y-3 pb-4 border-b border-green-50 relative group">
-              <div className="flex gap-3 items-center">
-                <div className="flex-1 relative">
-                  <span className="absolute -top-2 left-2 px-1 bg-[#FBFFF0] text-[9px] font-bold text-green-600 uppercase">Item</span>
-                  <input 
-                    value={item.name} 
-                    onChange={(e) => updateItem(idx, 'name', e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm font-medium text-green-800 outline-none focus:border-green-400 bg-white"
-                  />
-                </div>
-                <button 
-                  onClick={() => removeItem(idx)}
-                  className="p-2.5 bg-red-500 text-white rounded-lg hover:brightness-110 transition-all shadow-sm"
-                >
-                  <Trash2 size={16} />
-                </button>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="relative">
-                  <span className="absolute -top-2 left-2 px-1 bg-[#FBFFF0] text-[9px] font-bold text-green-600 uppercase">Qty</span>
-                  <input 
-                    type="number"
-                    value={item.quantity} 
-                    onChange={(e) => updateItem(idx, 'quantity', parseFloat(e.target.value))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm font-medium text-green-800 outline-none focus:border-green-400 bg-white"
-                  />
-                </div>
-                <div className="relative">
-                  <span className="absolute -top-2 left-2 px-1 bg-[#FBFFF0] text-[9px] font-bold text-green-600 uppercase">Price</span>
-                  <input 
-                    type="number"
-                    value={item.unitPrice} 
-                    onChange={(e) => updateItem(idx, 'unitPrice', parseFloat(e.target.value))}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm font-medium text-green-800 outline-none focus:border-green-400 bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
+          <div className="text-right">
+             <label className="text-[8px] font-black text-gray-400 uppercase tracking-widest block mb-0.5">Tanggal</label>
+             <input 
+               value={pendingReceipt.date} 
+               onChange={(e) => setPendingReceipt({...pendingReceipt, date: e.target.value})}
+               className="bg-transparent font-medium text-gray-600 text-[11px] w-full outline-none text-right"
+             />
+          </div>
         </div>
 
-        <div className="mt-8 space-y-3">
-          <button 
-            onClick={handleSave}
-            className="w-full bg-[#39FF14] text-[#2D3E2D] py-5 rounded-2xl font-black text-lg hover:brightness-105 active:scale-[0.98] transition-all shadow-lg"
-          >
-            Save Receipt
-          </button>
-          <button 
-            onClick={() => { setPendingReceipt(null); startCamera(); }}
-            className="w-full bg-green-50 text-green-700 py-4 rounded-2xl font-bold border border-green-100 hover:bg-green-100 transition-all"
-          >
-            Rescan Receipt
-          </button>
+        <div className="flex-1 overflow-y-auto max-h-[300px]">
+          <table className="w-full text-left border-collapse">
+            <thead className="sticky top-0 bg-white border-b border-gray-100 shadow-sm z-10">
+              <tr className="text-[8px] font-black text-gray-400 uppercase tracking-[0.2em]">
+                <th className="px-3 py-2">Item</th>
+                <th className="px-2 py-2 w-12 text-center">Qty</th>
+                <th className="px-2 py-2 w-24 text-right">Price</th>
+                <th className="px-3 py-2 w-8"></th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {pendingReceipt.items.map((item, idx) => (
+                <tr key={idx} className="hover:bg-gray-50/50 group">
+                  <td className="px-3 py-1.5">
+                    <input 
+                      value={item.name} 
+                      onChange={(e) => updateItem(idx, 'name', e.target.value)}
+                      className="w-full bg-transparent text-[11px] font-medium text-gray-700 outline-none"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input 
+                      type="number"
+                      value={item.quantity} 
+                      onChange={(e) => updateItem(idx, 'quantity', parseFloat(e.target.value))}
+                      className="w-full bg-transparent text-[11px] text-center outline-none"
+                    />
+                  </td>
+                  <td className="px-2 py-1.5">
+                    <input 
+                      type="number"
+                      value={item.unitPrice} 
+                      onChange={(e) => updateItem(idx, 'unitPrice', parseFloat(e.target.value))}
+                      className="w-full bg-transparent text-[11px] text-right font-bold text-[#2D3E2D] outline-none"
+                    />
+                  </td>
+                  <td className="px-3 py-1.5">
+                    <button onClick={() => removeItem(idx)} className="text-gray-300 hover:text-red-500 transition-colors">
+                      <Trash2 size={12} />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+          <div>
+            <span className="text-[8px] font-black text-gray-400 uppercase tracking-widest block">Subtotal</span>
+            <span className="text-base font-black text-[#2D3E2D]">Rp{pendingReceipt.grandTotal.toLocaleString()}</span>
+          </div>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => { setPendingReceipt(null); startCamera(); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold text-gray-500 hover:text-gray-800 transition-colors"
+            >
+              <RotateCcw size={12} />
+              Rescan
+            </button>
+            <button 
+              onClick={handleSave}
+              className="flex items-center gap-2 bg-[#D9ED92] text-[#2D3E2D] px-4 py-1.5 rounded-md font-bold text-xs shadow-sm hover:brightness-105 active:scale-95 transition-all"
+            >
+              <Save size={14} />
+              Simpan
+            </button>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-[40px] shadow-xl p-8 border border-gray-100 w-full max-w-4xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-        <div>
-          <h3 className="text-2xl font-bold flex items-center gap-2">
-            <span className="p-2 bg-[#D9ED92] rounded-xl">{ICONS.Camera}</span>
-            Scanner
-          </h3>
-          <p className="text-gray-500 mt-1">Place your receipt in the frame</p>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 max-w-2xl mx-auto overflow-hidden">
+      {isProcessing ? (
+        <div className="h-[300px] flex flex-col items-center justify-center p-6 text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-[#2D3E2D] animate-spin" />
+          <div>
+            <h3 className="text-sm font-bold text-[#2D3E2D]">Gemini sedang membaca...</h3>
+            <p className="text-[10px] text-gray-400">Digitalisasi struk sedang diproses.</p>
+          </div>
         </div>
-        {!isCameraActive && !isProcessing && (
-           <button 
-              onClick={startCamera}
-              className="flex items-center gap-2 bg-[#2D3E2D] text-[#D9ED92] px-6 py-3 rounded-2xl font-bold hover:brightness-125 transition-all shadow-md"
-           >
-             <Camera size={20} />
-             Start Camera
-           </button>
-         )}
-      </div>
-
-      <div className="relative overflow-hidden rounded-[32px] bg-gray-950 min-h-[500px] flex flex-col items-center justify-center transition-all group">
-        <canvas ref={canvasRef} className="hidden" />
-
-        {isProcessing ? (
-          <div className="text-center p-12 bg-white w-full h-full absolute inset-0 z-30 flex flex-col items-center justify-center">
-            <Loader2 className="w-16 h-16 text-[#2D3E2D] animate-spin mb-6" />
-            <p className="text-[#2D3E2D] font-bold text-2xl tracking-tighter">AI Processing Receipt...</p>
+      ) : isCameraActive ? (
+        <div className="relative h-[350px] sm:h-[400px] bg-black">
+          <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <div className="w-48 h-72 border border-[#D9ED92]/30 rounded shadow-[0_0_0_100vw_rgba(0,0,0,0.5)]"></div>
           </div>
-        ) : isCameraActive ? (
-          <div className="relative w-full h-[600px] bg-black">
-            <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center p-12">
-              <div className="w-full max-w-[320px] aspect-[1/2] border-2 border-[#D9ED92]/50 rounded-2xl relative shadow-[0_0_0_100vw_rgba(0,0,0,0.4)]">
-                <div className="absolute -top-1 -left-1 w-8 h-8 border-t-4 border-l-4 border-[#D9ED92] rounded-tl-xl"></div>
-                <div className="absolute -top-1 -right-1 w-8 h-8 border-t-4 border-r-4 border-[#D9ED92] rounded-tr-xl"></div>
-                <div className="absolute -bottom-1 -left-1 w-8 h-8 border-b-4 border-l-4 border-[#D9ED92] rounded-bl-xl"></div>
-                <div className="absolute -bottom-1 -right-1 w-8 h-8 border-b-4 border-r-4 border-[#D9ED92] rounded-br-xl"></div>
-              </div>
+          {isFlashing && <div className="absolute inset-0 bg-white z-50"></div>}
+          <div className="absolute bottom-4 left-0 right-0 flex justify-center items-center gap-4">
+            <button onClick={stopCamera} className="w-8 h-8 bg-black/40 text-white rounded-full flex items-center justify-center hover:bg-black/60 transition-colors">
+              <X size={16} />
+            </button>
+            <button 
+              onClick={capturePhoto}
+              className="w-12 h-12 bg-white rounded-full border-2 border-[#D9ED92] flex items-center justify-center hover:scale-105 active:scale-95 transition-all"
+            >
+              <div className="w-8 h-8 bg-[#2D3E2D] rounded-full flex items-center justify-center"><Camera className="text-[#D9ED92]" size={16} /></div>
+            </button>
+            <div className="w-8"></div>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-sm font-bold">Input Data Struk</h3>
+              <p className="text-[10px] text-gray-500 tracking-tight">AI akan mengekstrak data dari struk Anda.</p>
             </div>
-            {isFlashing && <div className="absolute inset-0 bg-white z-50"></div>}
-            <div className="absolute bottom-12 left-0 right-0 flex justify-center gap-6">
-              <button 
-                onClick={stopCamera}
-                className="w-16 h-16 bg-white/10 backdrop-blur-md rounded-full border border-white/20 flex items-center justify-center text-white"
+            <div className="flex gap-2">
+               <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-100 rounded-md text-[10px] font-bold text-gray-600 hover:bg-gray-50 transition-colors"
               >
-                <X size={24} />
+                <Upload size={12} />
+                Upload
               </button>
               <button 
-                onClick={capturePhoto}
-                className="w-20 h-20 bg-white rounded-full border-[6px] border-[#D9ED92] flex items-center justify-center shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                onClick={startCamera}
+                className="flex items-center gap-1.5 bg-[#2D3E2D] text-[#D9ED92] px-3 py-1.5 rounded-md text-[10px] font-bold hover:brightness-125 transition-all"
               >
-                <div className="w-12 h-12 bg-[#2D3E2D] rounded-full flex items-center justify-center"><Scan className="text-[#D9ED92]" size={24} /></div>
+                <Camera size={12} />
+                Kamera
               </button>
-              <div className="w-16"></div>
             </div>
           </div>
-        ) : (
+
           <div 
             onClick={() => fileInputRef.current?.click()}
-            className="w-full h-[500px] flex flex-col items-center justify-center p-12 cursor-pointer bg-white group"
+            className="border-2 border-dashed border-gray-50 rounded-lg p-8 text-center hover:border-[#D9ED92] hover:bg-green-50/10 transition-all cursor-pointer group"
           >
             <input type="file" ref={fileInputRef} onChange={(e) => {
               const file = e.target.files?.[0];
@@ -278,14 +294,14 @@ const ReceiptScanner: React.FC<ReceiptScannerProps> = ({ onReceiptProcessed }) =
                 reader.readAsDataURL(file);
               }
             }} className="hidden" accept="image/*" />
-            <div className="w-24 h-24 bg-gray-50 rounded-[40px] flex items-center justify-center mb-8 shadow-sm group-hover:scale-110 group-hover:bg-[#D9ED92]/20 transition-all border border-gray-100">
-              <Upload className="text-gray-400 group-hover:text-[#2D3E2D]" size={36} />
+            <div className="bg-gray-50 w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-green-50 transition-colors">
+              <Scan className="text-gray-300 group-hover:text-[#2D3E2D]" size={20} />
             </div>
-            <h4 className="text-[#2D3E2D] font-bold text-3xl tracking-tight mb-3">Ready to Scan</h4>
-            <p className="text-base text-gray-500 text-center max-w-sm">Tap the camera button or upload a photo to start digitalizing your business records.</p>
+            <p className="text-[11px] font-medium text-gray-400 group-hover:text-gray-500">Klik atau drop foto struk di sini</p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 };

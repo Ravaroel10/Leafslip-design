@@ -1,11 +1,11 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { GoogleGenAI } from '@google/genai';
-import { Leaf, Send, Loader2, Sparkles, User, Bot, HelpCircle } from 'lucide-react';
+import { Send, Loader2, Sparkles, User, Bot, Trash2 } from 'lucide-react';
 
 const FullChatbot: React.FC = () => {
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string }[]>([
-    { role: 'bot', text: 'Halo! I am your Leafslip Advisor. How can I help you optimize your business today? I can analyze your inventory patterns or suggest waste reduction strategies.' }
+    { role: 'bot', text: 'Halo! Saya Advisor Bisnis Leafslip Anda. Bagaimana saya bisa membantu mengoptimalkan bisnis Anda hari ini?' }
   ]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -31,87 +31,102 @@ const FullChatbot: React.FC = () => {
         model: 'gemini-3-pro-preview',
         contents: userMsg,
         config: {
-          systemInstruction: "You are Leafslip AI, a professional business consultant for Indonesian MSMEs. You help small shop owners with stock management, reducing food waste, and interpreting sales history. Your tone is respectful, encouraging, and uses local Indonesian context where appropriate."
+          systemInstruction: "You are Leafslip AI, a professional business consultant for Indonesian MSMEs. You help small shop owners with stock management and food waste. Tone: respectful, professional, practical. Use Indonesian context."
         }
       });
 
-      const botText = response.text || "Mohon maaf, I couldn't process that. Can you rephrase?";
+      const botText = response.text || "Maaf, sistem sedang sibuk.";
       setMessages(prev => [...prev, { role: 'bot', text: botText }]);
     } catch (error) {
-      setMessages(prev => [...prev, { role: 'bot', text: "Service temporarily unavailable. Please try again later." }]);
+      setMessages(prev => [...prev, { role: 'bot', text: "Layanan sedang tidak tersedia." }]);
     } finally {
       setIsTyping(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-160px)] bg-white rounded-[40px] shadow-xl border border-gray-100 flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-500">
-      <div className="bg-[#2D3E2D] p-8 text-white flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="bg-[#D9ED92] text-[#2D3E2D] p-2.5 rounded-2xl">
-            <Sparkles className="w-6 h-6" />
+    <div className="flex flex-col h-[calc(100vh-60px)] lg:h-screen bg-white overflow-hidden animate-in fade-in duration-500">
+      {/* Integrated Header */}
+      <div className="px-4 lg:px-6 py-3 lg:py-4 border-b border-gray-100 flex items-center justify-between bg-white z-20 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 lg:w-9 lg:h-9 bg-[#2D3E2D] rounded flex items-center justify-center text-[#D9ED92] border border-gray-200">
+            <Sparkles size={16} />
           </div>
           <div>
-            <h2 className="text-xl font-bold tracking-tight">AI Business Advisor</h2>
-            <p className="text-xs text-[#D9ED92] font-medium tracking-widest uppercase opacity-70">Leafslip Intelligence</p>
-          </div>
-        </div>
-        <HelpCircle className="text-white/40 cursor-help" size={24} />
-      </div>
-
-      <div ref={scrollRef} className="flex-1 overflow-y-auto p-8 space-y-6 bg-gray-50/50 custom-scrollbar">
-        {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`flex gap-3 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
-               <div className={`w-10 h-10 rounded-2xl flex-shrink-0 flex items-center justify-center ${m.role === 'user' ? 'bg-[#D9ED92] text-[#2D3E2D]' : 'bg-[#2D3E2D] text-white'}`}>
-                  {m.role === 'user' ? <User size={20} /> : <Bot size={20} />}
-               </div>
-               <div className={`rounded-3xl px-6 py-4 text-sm shadow-sm leading-relaxed ${
-                  m.role === 'user' 
-                    ? 'bg-[#2D3E2D] text-white rounded-tr-none' 
-                    : 'bg-white text-gray-700 border border-gray-100 rounded-tl-none'
-                }`}>
-                  {m.text}
-                </div>
+            <h2 className="text-xs lg:text-sm font-bold text-[#2D3E2D] uppercase tracking-widest">Advisor Bisnis</h2>
+            <div className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span>
+              <p className="text-[8px] text-gray-400 font-black uppercase tracking-widest">Aktif</p>
             </div>
           </div>
-        ))}
-        {isTyping && (
-          <div className="flex justify-start">
-             <div className="flex gap-3 max-w-[85%] items-center">
-                <div className="w-10 h-10 rounded-2xl bg-[#2D3E2D] text-white flex items-center justify-center">
-                  <Bot size={20} />
-                </div>
-                <div className="bg-white border border-gray-100 rounded-3xl px-6 py-4 shadow-sm flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-[#2D3E2D]" />
-                  <span className="text-xs text-gray-400 font-medium">Advisor is analyzing patterns...</span>
-                </div>
-             </div>
-          </div>
-        )}
+        </div>
+        <button 
+          onClick={() => setMessages([{ role: 'bot', text: 'Chat direset. Ada yang bisa saya bantu?' }])}
+          className="p-2 text-gray-300 hover:text-red-500 transition-all"
+        >
+          <Trash2 size={16} />
+        </button>
       </div>
 
-      <div className="p-8 bg-white border-t border-gray-100">
-        <div className="flex gap-4">
+      {/* Chat Messages */}
+      <div 
+        ref={scrollRef} 
+        className="flex-1 overflow-y-auto p-4 lg:p-10 space-y-6 lg:space-y-8 hide-scrollbar"
+      >
+        <div className="max-w-3xl mx-auto space-y-6 lg:space-y-8">
+          {messages.map((m, i) => (
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-1`}>
+              <div className={`flex gap-3 lg:gap-4 max-w-[95%] lg:max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                 <div className={`w-7 h-7 lg:w-8 lg:h-8 rounded flex-shrink-0 flex items-center justify-center border ${m.role === 'user' ? 'bg-[#D9ED92]/20 border-[#D9ED92]/50 text-[#2D3E2D]' : 'bg-gray-50 border-gray-100 text-gray-400'}`}>
+                    {m.role === 'user' ? <User size={12} /> : <Bot size={12} />}
+                 </div>
+                 <div className={`px-4 py-2.5 text-[11px] lg:text-sm leading-relaxed border ${
+                    m.role === 'user' 
+                      ? 'bg-[#2D3E2D] text-white border-[#2D3E2D] rounded-lg' 
+                      : 'bg-white text-gray-700 border-gray-100 rounded-lg'
+                  }`}>
+                    {m.text}
+                  </div>
+              </div>
+            </div>
+          ))}
+          {isTyping && (
+            <div className="flex justify-start">
+               <div className="flex gap-3 lg:gap-4 max-w-[80%] items-center">
+                  <div className="w-7 h-7 lg:w-8 lg:h-8 rounded bg-gray-50 border border-gray-100 flex items-center justify-center">
+                    <Bot size={12} />
+                  </div>
+                  <div className="flex items-center gap-2 text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                    Menganalisis...
+                  </div>
+               </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Input Bar */}
+      <div className="px-4 lg:px-6 py-4 lg:py-6 border-t border-gray-100 bg-white shrink-0">
+        <div className="max-w-3xl mx-auto flex gap-2 lg:gap-3">
           <input 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Ask about your stock, weekly trends, or waste reduction..."
-            className="flex-1 bg-gray-100 rounded-2xl px-6 py-4 text-base outline-none focus:ring-2 ring-[#D9ED92] transition-all"
+            placeholder="Ketik pesan..."
+            className="flex-1 bg-gray-50 border border-gray-100 rounded px-4 py-2.5 lg:py-3 text-[12px] lg:text-sm outline-none focus:border-[#D9ED92] transition-all"
           />
           <button 
             onClick={handleSend}
             disabled={!input.trim() || isTyping}
-            className="bg-[#D9ED92] text-[#2D3E2D] px-8 rounded-2xl hover:brightness-95 disabled:opacity-50 transition-all font-bold shadow-md flex items-center gap-2"
+            className="bg-[#2D3E2D] text-[#D9ED92] px-4 rounded font-bold hover:brightness-125 disabled:opacity-20 transition-all active:scale-95"
           >
-            <Send className="w-5 h-5" />
-            <span>Send</span>
+            <Send size={16} />
           </button>
         </div>
-        <p className="text-center text-[10px] text-gray-400 mt-4 font-bold uppercase tracking-widest">
-          Private MSME Consultation powered by Gemini 3.0
-        </p>
+        <div className="max-w-3xl mx-auto flex items-center justify-center mt-3 text-[8px] text-gray-300 font-black uppercase tracking-[0.2em]">
+          <p>Leafslip Intelligence AI</p>
+        </div>
       </div>
     </div>
   );

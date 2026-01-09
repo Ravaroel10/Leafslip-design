@@ -11,19 +11,17 @@ import FullChatbot from './components/FullChatbot';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
 import { ScannedReceipt, AppView, User } from './types';
-import { FileText, Clock, Search, Filter, History, BrainCircuit } from 'lucide-react';
-// Added missing ICONS import from constants
+import { FileText, Clock, Search, Filter, History, BrainCircuit, Menu, X } from 'lucide-react';
 import { ICONS } from './constants';
 
 const App: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState<AppView>('dashboard');
   const [history, setHistory] = useState<ScannedReceipt[]>([]);
-  
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
   const handleLogin = () => {
-    // Simulate Google Login
     setUser({
       name: 'Rafael A',
       email: 'rafael@leafslip.com',
@@ -37,6 +35,7 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
+    setIsSidebarOpen(false);
   };
 
   const handleNewReceipt = (receipt: ScannedReceipt) => {
@@ -52,79 +51,80 @@ const App: React.FC = () => {
         return <Dashboard user={user} history={history} onNavigate={setCurrentView} />;
       case 'scanner':
         return (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto px-2">
             <ReceiptScanner onReceiptProcessed={handleNewReceipt} />
           </div>
         );
       case 'recommender':
         return (
-          <div className="max-w-4xl mx-auto">
-            <div className="mb-10">
-              <h2 className="text-4xl font-bold tracking-tighter flex items-center gap-4">
-                <BrainCircuit className="text-[#2D3E2D] w-10 h-10" />
+          <div className="max-w-4xl mx-auto px-2">
+            <div className="mb-6">
+              <h2 className="text-lg font-bold tracking-tight flex items-center gap-2 text-[#2D3E2D]">
+                <BrainCircuit className="w-5 h-5" />
                 Stock Recommender
               </h2>
-              <p className="text-gray-500 mt-2 text-lg">Analisis bertenaga AI berdasarkan data struk Anda.</p>
+              <p className="text-[10px] text-gray-400 mt-0.5 font-bold uppercase tracking-wider">Analisis bertenaga AI berdasarkan data struk Anda.</p>
             </div>
             <StockInsights receipts={history} />
           </div>
         );
       case 'history':
         return (
-          <div className="space-y-8">
+          <div className="space-y-6 px-2">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div>
-                <h2 className="text-3xl font-bold tracking-tighter flex items-center gap-3 text-[#2D3E2D]">
-                  <History className="w-8 h-8" />
+                <h2 className="text-lg font-bold tracking-tight flex items-center gap-2 text-[#2D3E2D]">
+                  <History className="w-5 h-5" />
                   Riwayat Struk
                 </h2>
-                <p className="text-gray-500">Database bisnis digital Anda</p>
+                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Database bisnis digital Anda</p>
               </div>
               <div className="flex gap-2 w-full md:w-auto">
-                <div className="relative flex-1 md:w-80">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input placeholder="Cari barang atau toko..." className="w-full bg-white border border-gray-200 rounded-2xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 ring-[#D9ED92]" />
+                <div className="relative flex-1 md:w-64">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3 h-3" />
+                  <input placeholder="Cari barang..." className="w-full bg-white border border-gray-100 rounded-md pl-9 pr-3 py-2 text-[11px] outline-none focus:border-[#D9ED92] transition-colors" />
                 </div>
-                <button className="bg-white border border-gray-200 p-3 rounded-2xl text-gray-500 hover:bg-gray-50 transition-colors shadow-sm">
-                  <Filter size={20} />
+                <button className="bg-white border border-gray-100 p-2 rounded-md text-gray-400 hover:text-[#2D3E2D] transition-colors">
+                  <Filter size={14} />
                 </button>
               </div>
             </div>
 
             {history.length === 0 ? (
-              <div className="bg-white rounded-[40px] p-24 text-center border border-gray-100 shadow-sm flex flex-col items-center">
-                <div className="w-24 h-24 bg-gray-50 rounded-[40px] flex items-center justify-center mb-8">
-                  <FileText className="text-gray-300" size={40} />
+              <div className="bg-white rounded border border-gray-100 p-12 text-center flex flex-col items-center">
+                <div className="w-14 h-14 bg-gray-50 rounded-md flex items-center justify-center mb-4">
+                  <FileText className="text-gray-300" size={24} />
                 </div>
-                <h3 className="text-2xl font-bold text-[#2D3E2D] mb-3">Database Kosong</h3>
-                <p className="text-gray-500 max-w-sm mb-10 leading-relaxed text-lg">Struk yang Anda scan akan muncul di sini.</p>
+                <h3 className="text-sm font-bold text-[#2D3E2D] mb-1 uppercase tracking-widest">Database Kosong</h3>
+                <p className="text-[10px] text-gray-400 max-w-[220px] mb-6 leading-relaxed">Scan struk pertama Anda untuk mulai mendigitalkan inventaris.</p>
                 <button 
                   onClick={() => setCurrentView('scanner')}
-                  className="bg-[#2D3E2D] text-[#D9ED92] px-10 py-4 rounded-full font-bold shadow-xl hover:scale-105 transition-all text-lg"
+                  className="bg-[#2D3E2D] text-[#D9ED92] px-6 py-2.5 rounded font-bold text-xs hover:brightness-110 active:scale-95 transition-all uppercase tracking-widest"
                 >
-                  Buka Scanner
+                  Mulai Scan
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                 {history.map(receipt => (
-                  <div key={receipt.id} className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col group">
-                    <div className="flex justify-between items-start mb-6">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">{receipt.date}</span>
-                       <span className="text-[10px] font-bold bg-[#D9ED92] text-[#2D3E2D] px-4 py-1.5 rounded-full uppercase tracking-widest">{receipt.category}</span>
+                  <div key={receipt.id} className="bg-white p-5 rounded border border-gray-100 hover:border-[#D9ED92] transition-all flex flex-col group relative">
+                    <div className="flex justify-between items-start mb-4">
+                       <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">{receipt.date}</span>
+                       <span className="text-[8px] font-bold bg-[#D9ED92]/30 text-[#2D3E2D] px-2 py-0.5 rounded uppercase">{receipt.category}</span>
                     </div>
-                    <h4 className="font-bold text-xl mb-6 border-b border-gray-50 pb-4 truncate text-[#2D3E2D]">{receipt.merchantName}</h4>
-                    <div className="space-y-3 mb-8 flex-grow">
-                      {receipt.items.slice(0,3).map((item, idx) => (
-                        <div key={idx} className="flex justify-between text-sm text-gray-600">
-                          <span className="truncate pr-4 font-medium">{item.quantity}x {item.name}</span>
-                          <span className="font-bold text-[#2D3E2D]">Rp{item.total.toLocaleString()}</span>
+                    <h4 className="font-bold text-sm mb-3 border-b border-gray-50 pb-2 truncate text-[#2D3E2D]">{receipt.merchantName}</h4>
+                    <div className="space-y-2 mb-4 flex-grow">
+                      {receipt.items.slice(0,2).map((item, idx) => (
+                        <div key={idx} className="flex justify-between text-[10px] text-gray-500">
+                          <span className="truncate pr-6">{item.quantity}x {item.name}</span>
+                          <span className="font-bold text-[#2D3E2D] shrink-0">Rp{item.total.toLocaleString()}</span>
                         </div>
                       ))}
+                      {receipt.items.length > 2 && <p className="text-[8px] text-gray-300 font-bold uppercase">+{receipt.items.length - 2} items lainnya</p>}
                     </div>
-                    <div className="pt-6 border-t border-gray-50 flex justify-between items-center">
-                       <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">SUBTOTAL</span>
-                       <span className="text-2xl font-black text-[#2D3E2D]">Rp{receipt.grandTotal.toLocaleString()}</span>
+                    <div className="pt-4 border-t border-gray-50 flex justify-between items-center">
+                       <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest">Total Bayar</span>
+                       <span className="text-base font-black text-[#2D3E2D]">Rp{receipt.grandTotal.toLocaleString()}</span>
                     </div>
                   </div>
                 ))}
@@ -141,32 +141,26 @@ const App: React.FC = () => {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen selection:bg-[#D9ED92] selection:text-[#2D3E2D] bg-[#F8F9FA]">
-        <Navbar currentView={'home' as any} onNavigate={() => {}} />
-        <main className="pt-20">
+      <div className="min-h-screen selection:bg-[#D9ED92] selection:text-[#2D3E2D] bg-[#FDFDFD]">
+        <Navbar currentView={'dashboard'} onNavigate={() => {}} onOpenMobileMenu={() => setIsSidebarOpen(true)} />
+        <main className="pt-16 md:pt-20">
           <Hero />
-          <div className="max-w-7xl mx-auto px-6 py-20 flex flex-col items-center">
-             <div className="bg-white p-12 rounded-[40px] shadow-2xl border border-gray-100 text-center space-y-8 max-w-md w-full animate-in zoom-in duration-500">
-                <div className="text-[#D9ED92] bg-[#2D3E2D] p-4 rounded-3xl w-fit mx-auto shadow-xl">
-                  {/* Fixed: Access ICONS correctly after import */}
-                  {ICONS.Leaf}
+          <div className="max-w-7xl mx-auto px-6 py-12 flex flex-col items-center">
+             <div className="bg-white p-8 rounded border border-gray-100 text-center space-y-6 max-w-sm w-full animate-in zoom-in-95 duration-500">
+                <div className="text-[#D9ED92] bg-[#2D3E2D] p-3 rounded w-fit mx-auto shadow-sm">
+                  {React.cloneElement(ICONS.Leaf as React.ReactElement, { size: 24 })}
                 </div>
-                <div className="space-y-3">
-                  <h2 className="text-3xl font-black tracking-tighter text-[#2D3E2D]">Sign In to Dashboard</h2>
-                  <p className="text-gray-500 text-sm leading-relaxed">Kelola bisnis MSME Anda dengan kekuatan AI dari Leafslip.</p>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold tracking-tight text-[#2D3E2D] uppercase tracking-widest">Masuk Dashboard</h2>
+                  <p className="text-[11px] text-gray-400 leading-relaxed font-medium">Satu platform untuk semua struk belanja bisnis Anda.</p>
                 </div>
-                
                 <button 
                   onClick={handleLogin}
-                  className="w-full flex items-center justify-center gap-4 bg-white border-2 border-gray-100 py-4 rounded-2xl font-bold text-[#2D3E2D] hover:bg-gray-50 hover:border-[#D9ED92] transition-all shadow-sm group"
+                  className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 py-3 rounded font-bold text-xs text-[#2D3E2D] hover:bg-gray-50 hover:border-[#D9ED92] transition-all group active:scale-95"
                 >
-                  <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" className="w-6 h-6 group-hover:scale-110 transition-transform" alt="Google" />
+                  <img src="https://www.gstatic.com/images/branding/product/1x/googleg_48dp.png" className="w-4 h-4 transition-transform group-hover:scale-110" alt="Google" />
                   Sign in with Google
                 </button>
-                
-                <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                  Secure access for verified merchants
-                </p>
              </div>
           </div>
           <ServicesSection />
@@ -178,16 +172,50 @@ const App: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA] flex">
+    <div className="min-h-screen bg-[#FDFDFD] flex flex-col lg:flex-row relative">
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-[#2D3E2D]/10 backdrop-blur-[2px] z-50 lg:hidden transition-opacity duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Responsive Sidebar */}
       <Sidebar 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
         currentView={currentView} 
-        onNavigate={setCurrentView} 
+        onNavigate={(view) => {
+          setCurrentView(view);
+          setIsSidebarOpen(false);
+        }} 
         user={user!} 
         onLogout={handleLogout} 
       />
       
-      <main className="flex-1 ml-64 p-12">
-        {renderAuthenticatedView()}
+      {/* Mobile Sticky Header */}
+      <div className="lg:hidden flex items-center justify-between px-4 py-3 bg-white border-b border-gray-100 sticky top-0 z-40 shrink-0">
+        <div className="flex items-center gap-2 font-bold text-[11px] tracking-tight text-[#2D3E2D]">
+          <div className="text-[#D9ED92] bg-[#2D3E2D] p-1 rounded">
+            {React.cloneElement(ICONS.Leaf as React.ReactElement, { size: 14 })}
+          </div>
+          <span className="uppercase tracking-widest font-black">LEAFSLIP</span>
+        </div>
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="p-2 text-[#2D3E2D] hover:bg-gray-50 rounded-md transition-colors"
+          aria-label="Menu"
+        >
+          <Menu size={20} />
+        </button>
+      </div>
+
+      {/* Main Content Area */}
+      <main className={`flex-1 lg:ml-20 min-h-screen flex flex-col ${currentView === 'chatbot' ? 'overflow-hidden' : 'p-4 md:p-8 lg:p-12 overflow-x-hidden'}`}>
+        <div className="flex-1 w-full max-w-[1600px] mx-auto">
+          {renderAuthenticatedView()}
+        </div>
       </main>
     </div>
   );

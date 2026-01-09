@@ -12,6 +12,43 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
             scroll-behavior: smooth;
         }
+
+        /* Custom Scrollbar - Leafslip Theme */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #D9ED92;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2D3E2D;
+        }
+
+        /* Hide scrollbar for cleaner sidebar/nav components */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Animation for sidebar highlight */
+        @keyframes highlight-pop {
+            0% { transform: scale(0.95); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-highlight {
+            animation: highlight-pop 0.2s ease-out forwards;
+        }
     </style>
 <script type="importmap">
 {
@@ -25,7 +62,7 @@
 }
 </script>
 </head>
-<body class="bg-[#F8F9FA] text-[#2D3E2D]">
+<body class="bg-[#FDFDFD] text-[#2D3E2D] overflow-x-hidden">
     <div id="root"></div>
 </body>
 </html>
